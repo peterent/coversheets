@@ -21,18 +21,21 @@ import SwiftUI
  */
 extension View {
     func halfSheet<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) -> some View {
-        self.modifier(HalfSheetModifier(isPresented: isPresented, sheet: AnyView(content())))
+        self.modifier(PartialSheetModifier(isPresented: isPresented, heightFactor: 0.5, sheet: AnyView(content())))
     }
+    
     func quarterSheet<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) -> some View {
-        self.modifier(QuarterSheetModifier(isPresented: isPresented, sheet: AnyView(content())))
+        self.modifier(PartialSheetModifier(isPresented: isPresented, heightFactor: 0.25, sheet: AnyView(content())))
     }
 }
 
 /**
- * A ViewModifier to display the HalfSheet in an overlay, subject to the isPresented flag.
+ * A ViewModifier to display the PartialSheet in an overlay, subject to the isPresented flag. Passing
+ * in the heightFactor down to the PartialSheet.
  */
-private struct HalfSheetModifier: ViewModifier {
+struct PartialSheetModifier: ViewModifier {
     @Binding var isPresented: Bool
+    var heightFactor: CGFloat
     let sheet: AnyView
     
     func body(content: Content) -> some View {
@@ -41,33 +44,7 @@ private struct HalfSheetModifier: ViewModifier {
             .overlay(
                 Group {
                     if isPresented {
-                        HalfSheet(isPresented: self.$isPresented) {
-                            sheet
-                        }
-                    } else {
-                        EmptyView()
-                    }
-                }
-            )
-    }
-}
-
-/**
- * A ViewModifier to display the QuarterSheet in an over, subject to the iPresented flag.
- */
-private struct QuarterSheetModifier: ViewModifier {
-    @Binding var isPresented: Bool
-    let sheet: AnyView
-    
-    func body(content: Content) -> some View {
-        content
-            .blur(radius: isPresented ? 4.0 : 0.0)
-            .overlay(
-                Group {
-                    if isPresented {
-                        QuarterSheet(isPresented: self.$isPresented) {
-                            sheet
-                        }
+                        PartialSheet(isPresented: self.$isPresented, heightFactor: heightFactor) { sheet }
                     } else {
                         EmptyView()
                     }

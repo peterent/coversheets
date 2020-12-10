@@ -63,12 +63,18 @@ private struct BlockingView: View {
  * zIndex is not set, adding and removing children will not have the transitions work
  * correctly as SwiftUI will think it is not adding and removing the same child.
  */
-private struct PartialSheet<Content: View>: View {
+struct PartialSheet<Content: View>: View {
     @Binding var isPresented: Bool
     var content: Content
     let height: CGFloat
     
     @State private var showingContent = false
+    
+    init(isPresented: Binding<Bool>, heightFactor: CGFloat, @ViewBuilder content: () -> Content) {
+        _isPresented = isPresented
+        height = heightFactor
+        self.content = content()
+    }
     
     var body: some View {
         GeometryReader { reader in
@@ -87,43 +93,5 @@ private struct PartialSheet<Content: View>: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
-    }
-}
-
-// MARK: - HALF SHEET
-
-/**
- * Displays a sheet that's half as high as the screen.
- */
-struct HalfSheet<Content: View>: View {
-    @Binding var isPresented: Bool
-    var content: Content
-        
-    init(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) {
-        _isPresented = isPresented
-        self.content = content()
-    }
-    
-    var body: some View {
-        PartialSheet(isPresented: self.$isPresented, content: content, height: 0.5)
-    }
-}
-
-// MARK: - QUARTER SHEET
-
-/**
- * Displays a sheet that's a quarter of the screen's height.
- */
-struct QuarterSheet<Content: View>: View {
-    @Binding var isPresented: Bool
-    var content: Content
-        
-    init(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) {
-        _isPresented = isPresented
-        self.content = content()
-    }
-    
-    var body: some View {
-        PartialSheet(isPresented: self.$isPresented, content: content, height: 0.25)
     }
 }
